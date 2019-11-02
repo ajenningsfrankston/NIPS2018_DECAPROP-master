@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 from tqdm import tqdm
 import numpy as np
@@ -11,13 +8,19 @@ from nltk.tokenize import word_tokenize
 import json
 import os
 import gzip
-from .utilities import *
-from .utils import *
-from nltk.stem.porter import PorterStemmer
+from prep.utilities import *
+from prep.utils import *
+
 import argparse
+from nltk.stem.porter import PorterStemmer
+
+porter_stemmer = PorterStemmer()
+
+
 # from nus_utilities import *
 # from common_v2 import *
-import sys
+
+
 
 
 # sys.dont_write_bytecode = True
@@ -96,9 +99,10 @@ def load_set(fp, datatype='train'):
     return all_words, all_data, all_feats
 
 
-train_words, train_data, train_feats = load_set('./corpus/narrativeqa/train.json')
-dev_words, dev_data, dev_feats = load_set('./corpus/narrativeqa/dev.json')
-test_words, test_data, test_feats = load_set('./corpus/narrativeqa/test.json')
+train_words, train_data, train_feats = load_set('../corpus/narrativeqa/train.json')
+dev_words, dev_data, dev_feats = load_set('../corpus/narrativeqa/dev.json')
+test_words, test_data, test_feats = load_set('../corpus/narrativeqa/test.json')
+
 
 all_words = train_words + dev_words + test_words
 
@@ -116,7 +120,7 @@ print("Vocab Size={}".format(len(word_index)))
 # Convert passages to tokens
 # passages = dict(train_passage.items() + test_passage.items() + dev_passage.items())
 
-fp = './datasets/NarrativeQA/'
+fp = '../datasets/NarrativeQA/'
 
 if not os.path.exists(fp):
     os.makedirs(fp)
@@ -143,5 +147,5 @@ feature_env = {
     'dev':dev_feats
     }
 
-dictToFile(env,'./datasets/NarrativeQA/env.gz'.format(mode))
-dictToFile(feature_env,'./datasets/NarrativeQA/feats.gz'.format(mode))
+dictToFile(env,'../datasets/NarrativeQA/env.gz'.format(mode))
+dictToFile(feature_env,'../datasets/NarrativeQA/feats.gz'.format(mode))

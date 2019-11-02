@@ -20,7 +20,7 @@ import sys
 '''
 
 tweet_tokenizer = TweetTokenizer()
-porter_stemmer = PorterStemmer()
+
 
 def find_sub_list(sl,l):
     results=[]
