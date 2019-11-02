@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 from tqdm import tqdm
 import numpy as np
@@ -12,8 +9,7 @@ import json
 import os
 import gzip
 import csv
-from .utilities import *
-from .utils import *
+from prep.utilities import *
 from nltk.stem.porter import PorterStemmer
 import argparse
 import operator
@@ -35,9 +31,9 @@ for span selection.
 
 # Load passages / summaries
 passages = {}
-with open('./corpus/narrativeqa/third_party/wikipedia/summaries.csv','r') as f:
+with open('../corpus/narrativeqa/third_party/wikipedia/summaries.csv','r') as f:
     reader = csv.reader(f, delimiter=',')
-    reader.next()
+    next(reader)
     for r in reader:
         passages[r[0]] = r[3]
 
@@ -55,14 +51,16 @@ def find_sub_list(sl,l):
 
 max_span = 6
 
-fp = './corpus/narrativeqa/qaps.csv'
+fp = '../corpus/narrativeqa/qaps.csv'
 stoplist = {'the', 'a', '.', ','}
 train, dev, test = [],[],[]
 ignored_train, ignored_eval = 0, 0
 
+
+
 with open(fp, 'r') as f:
     reader = csv.reader(f, delimiter=',')
-    reader.next()   # Skip Header
+    next(reader)   # Skip Header
     for idx, r in tqdm(enumerate(reader)):
         # if(idx>500):
         #     break
@@ -73,21 +71,22 @@ with open(fp, 'r') as f:
         question = r[5]
         answer1 = r[6]
         answer2 = r[7]
-        passage =passages[_id]
+        passage = passages[_id]
         p = passage.split(' ')
         results = {}
         for i in range(0, max_span):
             ngrams = get_ngrams(i+1, p)
             ngrams = [' '.join(x) for x in ngrams]
             for n in ngrams:
-
-                # is this right syntax for rouge score ? xxx
-
-                r = Rouge().get_scores([n], [answer1, answer2])
-                if(r>0):
-                    results[n] = r
-        sorted_results = sorted(results.items(),
-                        key=operator.itemgetter(1), reverse=True)
+                # not sure this is correct xxx #
+                r = Rouge()._get_scores([n], [answer1, answer2])
+                lscores = r[0].get('rouge-l')
+                lscore_recall = lscores.get('r')
+                s = lscore_recall
+                if(s > 0):
+                    print(s)
+                    results[n] = s
+        sorted_results = sorted(results.items(),key=operator.itemgetter(1), reverse=True)
 
         new_results = []
         for s in sorted_results:
@@ -110,7 +109,7 @@ with open(fp, 'r') as f:
         # train_labels = [new_results[0], spans]
         span_ans = p[spans[0][0]:spans[0][1]+1]
         ans_str = ' '.join(chosen_ans)
-        assert(' '.join(span_ans)==ans_str)
+        assert(' '.join(span_ans) == ans_str)
 
         answers = [ans_str, spans]
         # print(train_labels)
@@ -134,11 +133,11 @@ print("Train={} Dev={} Test={}".format(
 print("Ignored Train={} Ignored Eval={}".format(ignored_train,ignored_eval))
 
 
-with open('./corpus/narrativeqa/train.json', 'w') as f:
+with open('../corpus/narrativeqa/train.json', 'w') as f:
     f.write(json.dumps(train,  indent=4,))
 
-with open('./corpus/narrativeqa/dev.json', 'w') as f:
+with open('../corpus/narrativeqa/dev.json', 'w') as f:
     f.write(json.dumps(dev,  indent=4,))
 
-with open('./corpus/narrativeqa/test.json', 'w') as f:
+with open('../corpus/narrativeqa/test.json', 'w') as f:
     f.write(json.dumps(test,  indent=4,))
